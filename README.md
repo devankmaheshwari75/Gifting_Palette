@@ -1,4 +1,4 @@
-# Artisan Resin Creations - Handmade Resin Art Website
+# Gifting Palette Creations - Handmade Resin Art Website
 
 A beautiful, responsive website for showcasing handmade resin art products including watches, keyrings, and photo frames. Built with Next.js, TypeScript, Tailwind CSS, and Framer Motion.
 

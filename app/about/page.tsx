@@ -22,7 +22,7 @@ export default function About() {
             className="text-center"
           >
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-6">
-              About Artisan Resin
+              About Gifting Palette
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Crafting beautiful resin art pieces with passion, creativity, and attention to detail. 
@@ -47,7 +47,7 @@ export default function About() {
               </h2>
               <div className="space-y-4 text-gray-600">
                 <p>
-                  Artisan Resin was born from a passion for creating beautiful, unique pieces 
+                  Gifting Palette was born from a passion for creating beautiful, unique pieces 
                   that bring joy and personality to everyday life. What started as a hobby 
                   quickly became a beloved business, connecting with customers who appreciate 
                   handcrafted quality and unique designs.

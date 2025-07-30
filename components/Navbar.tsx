@@ -25,7 +25,7 @@ const Navbar = () => {
               <ShoppingBag className="w-5 h-5 text-white" />
             </div>
             <span className="font-serif text-xl font-bold text-gray-900">
-              Artisan Resin
+            Gifting Palette
             </span>
           </Link>
 

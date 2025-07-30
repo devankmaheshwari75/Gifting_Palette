@@ -5,7 +5,8 @@ import { MessageCircle } from 'lucide-react';
 
 const FloatingWhatsApp = () => {
   const handleClick = () => {
-    window.open('https://www.instagram.com/artist_bhoomi_/', '_blank');
+    window.open(`https://wa.me/7340991544?text=Hi%20there!%20I'm%20interested%20in%20your%20resin%20art.
+`, '_blank');
   };
 
   return (
