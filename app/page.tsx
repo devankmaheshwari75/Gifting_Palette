@@ -16,7 +16,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="pt-16 pb-20 gradient-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,8 +33,8 @@ export default function Home() {
                 That Tells Your Story
               </h1>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Discover unique, handcrafted resin pieces that bring beauty and personality 
-                to your everyday life. From elegant watches to charming keyrings, 
+                Discover unique, handcrafted  pieces that bring beauty and personality
+                to your everyday life. From elegant watches to charming keyrings,
                 each piece is crafted with love and attention to detail.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -42,12 +42,20 @@ export default function Home() {
                   Explore Gallery
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
-                <button className="btn-secondary" onClick={() => window.open('https://www.instagram.com/artist_bhoomi_/', '_blank')}>
+                <button
+                  className="btn-secondary"
+                  onClick={() =>
+                    window.open(
+                      "https://wa.me/7340991544?text=Hey%2C%20I%20want%20to%20place%20a%20custom%20order!!",
+                      "_blank"
+                    )
+                  }
+                >
                   Custom Order
                 </button>
               </div>
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -56,14 +64,14 @@ export default function Home() {
             >
               <div className="relative h-96 lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
-                  src="https://drive.google.com/uc?export=view&id=12XhKbAWw0Ec7CZDK48a47oiMPzui5zy3"
+                  src="https://plus.unsplash.com/premium_photo-1665949503249-d330c0f2eecb?q=80&w=388&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                   alt="Resin Art Collection"
                   fill
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
               </div>
-              
+
               {/* Floating Elements */}
               <motion.div
                 animate={{ y: [-10, 10, -10] }}
@@ -72,7 +80,7 @@ export default function Home() {
               >
                 <Sparkles className="w-6 h-6 text-primary-500" />
               </motion.div>
-              
+
               <motion.div
                 animate={{ y: [10, -10, 10] }}
                 transition={{ duration: 4, repeat: Infinity }}
@@ -96,10 +104,10 @@ export default function Home() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-4">
-              Why Choose Our Resin Art?
+              Why Choose Our Artwork ?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Each piece is carefully crafted with premium materials and unique designs 
+              Each piece is carefully crafted with premium materials and unique designs
               that reflect your personal style and preferences.
             </p>
           </motion.div>
@@ -157,7 +165,7 @@ export default function Home() {
               Featured Products
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Discover our most popular resin art pieces, each telling a unique story 
+              Discover our most popular resin art pieces, each telling a unique story
               and bringing beauty to your everyday life.
             </p>
           </motion.div>
@@ -204,7 +212,7 @@ export default function Home() {
               Ready to Create Something Special?
             </h2>
             <p className="text-xl mb-8 max-w-2xl mx-auto">
-              Let's work together to create a custom resin piece that perfectly 
+              Let's work together to create a custom resin piece that perfectly
               matches your style and tells your unique story.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -13,7 +13,7 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: 'Artisan Resin Creations | Handmade Resin Art',
+  title: 'Gifting Palette Creations | Handmade Resin Art',
   description: 'Discover beautiful handmade resin art pieces including watches, keyrings, and photo frames. Custom designs available.',
   keywords: 'resin art, handmade, watches, keyrings, photo frames, custom designs',
 }
