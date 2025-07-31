@@ -15,6 +15,7 @@ export default function Contact() {
     phone: '',
     message: '',
   });
+ 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +33,7 @@ export default function Contact() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="pt-20 pb-16 gradient-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -46,7 +47,7 @@ export default function Contact() {
               Get in Touch
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Have a question or want to place a custom order? We'd love to hear from you! 
+              Have a question or want to place a custom order? We'd love to hear from you!
               Reach out to us and let's create something beautiful together.
             </p>
           </motion.div>
@@ -67,7 +68,15 @@ export default function Contact() {
               <h2 className="text-3xl font-serif font-bold text-gray-900 mb-6">
                 Send us a Message
               </h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form action="https://formsubmit.co/gifttingpalette@gmail.com" method='POST' className="space-y-6">
+                {/* Disable CAPTCHA */}
+                <input type="hidden" name="_captcha" value="false" />
+
+                {/* Email subject */}
+                <input type="hidden" name="_subject" value="New Contact Form Submission" />
+
+                {/* Thank-you redirect (optional) */}
+                <input type="hidden" name="_next" value="https://gifting-palette.vercel.app/" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -100,7 +109,7 @@ export default function Contact() {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                     Phone Number
@@ -112,10 +121,10 @@ export default function Contact() {
                     value={formData.phone}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200"
-                    placeholder="+91 98765 43210"
+                    placeholder="+91 8392839883"
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
                     Message *
@@ -131,7 +140,7 @@ export default function Contact() {
                     placeholder="Tell us about your custom order or any questions you have..."
                   />
                 </div>
-                
+
                 <button
                   type="submit"
                   className="btn-primary w-full"
@@ -151,7 +160,7 @@ export default function Contact() {
               <h2 className="text-3xl font-serif font-bold text-gray-900 mb-6">
                 Contact Information
               </h2>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -159,7 +168,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">Phone</h3>
-                    <p className="text-gray-600">+91 98765 43210</p>
+                    <p className="text-gray-600">+91 7340991544</p>
                     <p className="text-sm text-gray-500">Available for calls and Instagram DM</p>
                   </div>
                 </div>
@@ -170,7 +179,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">Email</h3>
-                    <p className="text-gray-600">hello@artisanresin.com</p>
+                    <p className="text-gray-600">gifttingpalette@gmail.com</p>
                     <p className="text-sm text-gray-500">We'll respond within 24 hours</p>
                   </div>
                 </div>
@@ -181,7 +190,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">Location</h3>
-                    <p className="text-gray-600">Mumbai, Maharashtra, India</p>
+                    <p className="text-gray-600">Jaipur , Rajasthan , India</p>
                     <p className="text-sm text-gray-500">Serving customers nationwide</p>
                   </div>
                 </div>
@@ -204,8 +213,8 @@ export default function Contact() {
                   <MessageCircle className="w-5 h-5" />
                   <span>DM on Instagram</span>
                 </button>
-                
-                <button className="w-full btn-secondary flex items-center justify-center space-x-2" onClick={() => window.open('https://www.instagram.com/artist_bhoomi_/', '_blank')}>
+
+                <button className="w-full btn-secondary flex items-center justify-center space-x-2" onClick={() => window.open('https://mail.google.com/mail/?view=cm&fs=1&to=gifttingpalette@gmail.com&su=Custom%20Order%20Request&body=Hi%2C%20I%20would%20like%20to%20place%20a%20custom%20order.', '_blank')}>
                   <Mail className="w-5 h-5" />
                   <span>Send Email</span>
                 </button>

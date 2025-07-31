@@ -9,10 +9,11 @@ import Footer from '../components/Footer';
 import FloatingWhatsApp from '../components/FloatingWhatsApp';
 import ProductCard from '../components/ProductCard';
 import { products } from '../data/products';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const featuredProducts = products.filter(product => product.featured);
-
+const router = useRouter();
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -28,7 +29,7 @@ export default function Home() {
             >
               <h1 className="text-4xl md:text-6xl font-serif font-bold text-gray-900 mb-6">
                 Handcrafted{' '}
-                <span className="text-primary-600">Resin Art</span>
+                <span className="text-primary-600">Art Work</span>
                 <br />
                 That Tells Your Story
               </h1>
@@ -126,7 +127,7 @@ export default function Home() {
               },
               {
                 title: 'Durable & Beautiful',
-                description: 'Made with high-quality resin that\'s both beautiful and built to last through daily use.',
+                description: 'Made with high-quality material that\'s both beautiful and built to last through daily use.',
                 icon: '💎',
               },
             ].map((feature, index) => (
@@ -212,14 +213,15 @@ export default function Home() {
               Ready to Create Something Special?
             </h2>
             <p className="text-xl mb-8 max-w-2xl mx-auto">
-              Let's work together to create a custom resin piece that perfectly
+              Let's work together to create a custom art piece that perfectly
               matches your style and tells your unique story.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-primary-600 hover:bg-gray-100 font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105" onClick={() => window.open('https://www.instagram.com/artist_bhoomi_/', '_blank')}>
+              <button className="bg-white text-primary-600 hover:bg-gray-100 font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105" onClick={() => window.open("https://wa.me/7340991544?text=Hey%2C%20I%20want%20to%20place%20a%20custom%20order!!",
+                "_blank")}>
                 Start Custom Order
               </button>
-              <button className="border-2 border-white text-white hover:bg-white hover:text-primary-600 font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105" onClick={() => window.open('https://www.instagram.com/artist_bhoomi_/', '_blank')}>
+              <button className="border-2 border-white text-white hover:bg-white hover:text-primary-600 font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105" onClick={() => router.push('/contact')}>
                 Contact Us
               </button>
             </div>

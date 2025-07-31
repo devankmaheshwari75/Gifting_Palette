@@ -8,10 +8,13 @@ import Footer from '../../components/Footer';
 import FloatingWhatsApp from '../../components/FloatingWhatsApp';
 import ProductCard from '../../components/ProductCard';
 import { products, categories } from '../../data/products';
+import { useRouter } from 'next/navigation';
 
 export default function Gallery() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const router = useRouter();
+
 
   const filteredProducts = selectedCategory === 'all' 
     ? products 
@@ -152,10 +155,11 @@ export default function Gallery() {
               and let's create something special together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary">
+              <button className="btn-primary" onClick={() => window.open("https://wa.me/7340991544?text=Hey%2C%20I%20want%20to%20place%20a%20custom%20order!!",
+                "_blank")}>
                 Start Custom Order
               </button>
-              <button className="btn-secondary">
+              <button className="btn-secondary" onClick={() => router.push('/contact')}>
                 Contact Us
               </button>
             </div>

@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Heart, Award, Users, Palette } from 'lucide-react';
@@ -8,6 +9,7 @@ import Footer from '../../components/Footer';
 import FloatingWhatsApp from '../../components/FloatingWhatsApp';
 
 export default function About() {
+  const router = useRouter();
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -228,10 +230,11 @@ export default function About() {
               a custom piece or want to explore our collection, we're here to help.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-primary-600 hover:bg-gray-100 font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
+              <button className="bg-white text-primary-600 hover:bg-gray-100 font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105" onClick={() => window.open("https://wa.me/7340991544?text=Hey%2C%20I%20want%20to%20place%20a%20custom%20order!!",
+                "_blank")}>
                 Start Custom Order
               </button>
-              <button className="border-2 border-white text-white hover:bg-white hover:text-primary-600 font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
+              <button className="border-2 border-white text-white hover:bg-white hover:text-primary-600 font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105" onClick={() => router.push('/contact')}>
                 Contact Us
               </button>
             </div>
