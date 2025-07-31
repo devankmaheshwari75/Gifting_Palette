@@ -176,9 +176,8 @@ This project is licensed under the MIT License.
 ## Support
 
 For support or questions, please contact:
-- Email: hello@artisanresin.com
-- WhatsApp: +91 98765 43210
+- Email: maheshwaridevank@gmail.com
+- WhatsApp: +91 7009972197
 
 ---
 
-Built with ❤️ for showcasing beautiful handmade resin art. 
