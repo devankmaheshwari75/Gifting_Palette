@@ -13,7 +13,7 @@ const Footer = () => {
                 <span className="text-white font-bold">A</span>
               </div>
               <span className="font-serif text-xl font-bold">
-                Gifting Palette Creations
+                Gifting Palette 
               </span>
             </div>
             <p className="text-gray-300 mb-4 max-w-md">
@@ -78,7 +78,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 Gifting Palette . All rights reserved.</p>
+          <p>&copy; 2025 Gifting Palette . All rights reserved.</p>
         </div>
       </div>
     </footer>
