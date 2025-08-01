@@ -1,19 +1,38 @@
-'use client';
-import Image from 'next/image';
-import Link from 'next/link';
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, Star, Sparkles } from 'lucide-react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import FloatingWhatsApp from '../components/FloatingWhatsApp';
-import ProductCard from '../components/ProductCard';
-import { products } from '../data/products';
-import { useRouter } from 'next/navigation';
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { getFeaturedProducts } from '../lib/supabase'
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
+import FloatingWhatsApp from '../components/FloatingWhatsApp'
+import ProductCard from '../components/ProductCard'
+import { ArrowRight, Star, Shield, Truck } from 'lucide-react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Sparkles } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
-  const featuredProducts = products.filter(product => product.featured);
-const router = useRouter();
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+
+  useEffect(() => {
+    fetchFeaturedProducts()
+  }, [])
+
+  const fetchFeaturedProducts = async () => {
+    try {
+      const data = await getFeaturedProducts()
+      setFeaturedProducts(data)
+    } catch (error) {
+      console.error('Error fetching products:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -171,19 +190,25 @@ const router = useRouter();
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <ProductCard product={product} />
-              </motion.div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredProducts.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <ProductCard product={product} />
+                </motion.div>
+              ))}
+            </div>
+          )}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}

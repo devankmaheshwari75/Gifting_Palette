@@ -1,183 +1,202 @@
-# Gifting Palette Creations - Handmade Resin Art Website
+# Resin Art Gallery - Admin Panel
 
-A beautiful, responsive website for showcasing handmade resin art products including watches, keyrings, and photo frames. Built with Next.js, TypeScript, Tailwind CSS, and Framer Motion.
+A beautiful, responsive website for showcasing handmade resin art products with a complete admin panel for product management.
 
 ## Features
 
-- ✨ **Modern Design**: Clean, elegant design with beautiful animations
-- 📱 **Fully Responsive**: Works perfectly on mobile, tablet, and desktop
-- 🎨 **Product Gallery**: Showcase all products with filtering and search
-- 💬 **WhatsApp Integration**: Direct messaging for orders and customization
-- 🎯 **Custom Orders**: Easy customization request system
-- ⚡ **Fast Performance**: Optimized for speed and SEO
-- 🚀 **Vercel Ready**: Deploy-ready configuration
+### Customer-Facing Features
+- **Responsive Design**: Works perfectly on mobile, tablet, and desktop
+- **Product Gallery**: Browse all products with category filtering
+- **Featured Products**: Highlight special products on the homepage
+- **Contact Integration**: Direct WhatsApp/Instagram integration for orders
+- **Modern UI**: Beautiful animations and elegant design
+
+### Admin Panel Features
+- **Secure Authentication**: Supabase authentication system
+- **Product Management**: Add, edit, delete products
+- **Image Upload**: Automatic image upload to Supabase storage
+- **Real-time Updates**: Changes reflect immediately on the website
+- **Dashboard Analytics**: View total products, featured count, and total value
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Animations**: Framer Motion
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Styling**: Tailwind CSS, Framer Motion
+- **Backend**: Supabase (Database + Storage + Authentication)
 - **Icons**: Lucide React
-- **Deployment**: Vercel
+- **Notifications**: React Hot Toast
 
-## Getting Started
+## Setup Instructions
 
-### Prerequisites
+### 1. Clone and Install Dependencies
 
-- Node.js 18+ 
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone <your-repo-url>
 cd resin-art-gallery
-```
-
-2. Install dependencies:
-```bash
 npm install
-# or
-yarn install
 ```
 
-3. Run the development server:
+### 2. Set Up Supabase
+
+1. **Create a Supabase Project**:
+   - Go to [supabase.com](https://supabase.com)
+   - Sign up and create a new project
+   - Note down your project URL and anon key
+
+2. **Create Environment Variables**:
+   Create a `.env.local` file in the root directory:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url_here
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+   ```
+
+3. **Set Up Database**:
+   In your Supabase dashboard, go to SQL Editor and run this query:
+   ```sql
+   -- Create products table
+   CREATE TABLE products (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     name VARCHAR NOT NULL,
+     type VARCHAR NOT NULL,
+     description TEXT NOT NULL,
+     image VARCHAR NOT NULL,
+     price DECIMAL(10,2) NOT NULL,
+     category VARCHAR NOT NULL,
+     featured BOOLEAN DEFAULT false,
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+   );
+
+   -- Enable Row Level Security
+   ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+
+   -- Create policy to allow public read access
+   CREATE POLICY "Allow public read access" ON products
+     FOR SELECT USING (true);
+
+   -- Create policy to allow authenticated users to insert
+   CREATE POLICY "Allow authenticated insert" ON products
+     FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+   -- Create policy to allow authenticated users to update
+   CREATE POLICY "Allow authenticated update" ON products
+     FOR UPDATE USING (auth.role() = 'authenticated');
+
+   -- Create policy to allow authenticated users to delete
+   CREATE POLICY "Allow authenticated delete" ON products
+     FOR DELETE USING (auth.role() = 'authenticated');
+   ```
+
+4. **Set Up Storage**:
+   - Go to Storage in your Supabase dashboard
+   - Create a new bucket called `product-images`
+   - Set it to public
+   - Create this policy for the bucket:
+   ```sql
+   CREATE POLICY "Allow public read access" ON storage.objects
+     FOR SELECT USING (bucket_id = 'product-images');
+
+   CREATE POLICY "Allow authenticated uploads" ON storage.objects
+     FOR INSERT WITH CHECK (bucket_id = 'product-images' AND auth.role() = 'authenticated');
+   ```
+
+### 3. Create Admin User
+
+1. **Enable Email Auth**:
+   - Go to Authentication > Settings in Supabase
+   - Enable Email provider
+   - Disable "Confirm email" if you want immediate access
+
+2. **Create Admin Account**:
+   - Go to Authentication > Users
+   - Click "Add User"
+   - Enter admin email and password
+   - This will be your login credentials for the admin panel
+
+### 4. Run the Development Server
+
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) to view the website.
+
+## Admin Panel Access
+
+- **URL**: `http://localhost:3000/admin`
+- **Login**: Use the email and password you created in Supabase
+- **Features**:
+  - Add new products with images
+  - Edit existing products
+  - Delete products
+  - Mark products as featured
+  - View dashboard statistics
 
 ## Project Structure
 
 ```
-├── app/                    # Next.js app directory
-│   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Home page
-│   ├── gallery/           # Gallery page
-│   ├── about/             # About page
-│   └── contact/           # Contact page
-├── components/            # React components
-│   ├── Navbar.tsx        # Navigation component
-│   ├── Footer.tsx        # Footer component
-│   ├── ProductCard.tsx   # Product card component
-│   └── FloatingWhatsApp.tsx # WhatsApp button
-├── data/                 # Data files
-│   └── products.ts       # Product data
-├── public/               # Static assets
-└── tailwind.config.js    # Tailwind configuration
+├── app/
+│   ├── admin/           # Admin dashboard
+│   ├── gallery/         # Product gallery page
+│   ├── about/           # About page
+│   ├── contact/         # Contact page
+│   └── page.tsx         # Homepage
+├── components/
+│   ├── AdminLogin.tsx   # Admin authentication
+│   ├── ProductForm.tsx  # Product add/edit form
+│   ├── ProductCard.tsx  # Product display component
+│   ├── Navbar.tsx       # Navigation
+│   ├── Footer.tsx       # Footer
+│   └── FloatingWhatsApp.tsx # Floating contact button
+├── lib/
+│   └── supabase.ts      # Supabase configuration and functions
+├── data/
+│   └── products.ts      # Static product data (fallback)
+└── public/              # Static assets
 ```
 
 ## Customization
 
-### Adding Products
+### Colors and Styling
+- Edit `tailwind.config.js` to customize colors and fonts
+- Modify `app/globals.css` for global styles
 
-Edit `data/products.ts` to add or modify products:
+### Product Categories
+- Update the category options in `components/ProductForm.tsx`
+- Categories are automatically generated from existing products
 
-```typescript
-export const products: Product[] = [
-  {
-    id: 'unique-id',
-    name: 'Product Name',
-    type: 'Product Type',
-    description: 'Product description',
-    image: 'image-url',
-    price: '₹1,200',
-    category: 'watches', // or 'keyrings', 'photo-frames'
-    featured: true, // optional
-  },
-  // ... more products
-];
-```
-
-### Updating Contact Information
-
-Update the contact information in:
-- `components/Footer.tsx`
-- `app/contact/page.tsx`
-- `components/FloatingWhatsApp.tsx`
-
-### Changing Colors
-
-Modify the color scheme in `tailwind.config.js`:
-
-```javascript
-colors: {
-  primary: {
-    // Your primary colors
-  },
-  accent: {
-    // Your accent colors
-  },
-}
-```
+### Contact Information
+- Update WhatsApp number in components
+- Update Instagram links throughout the site
 
 ## Deployment
 
-### Vercel (Recommended)
-
+### Vercel Deployment
 1. Push your code to GitHub
 2. Connect your repository to Vercel
-3. Deploy automatically
+3. Add environment variables in Vercel dashboard
+4. Deploy!
 
-### Manual Deployment
+### Environment Variables for Production
+Make sure to add these to your production environment:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-1. Build the project:
-```bash
-npm run build
-```
+## Security Features
 
-2. Start the production server:
-```bash
-npm start
-```
-
-## Features in Detail
-
-### Product Gallery
-- Filter by category (Watches, Keyrings, Photo Frames)
-- Grid and list view options
-- Responsive masonry layout
-- Hover effects and animations
-
-### WhatsApp Integration
-- Floating WhatsApp button
-- Pre-filled messages for customization
-- Direct order placement
-- Contact information
-
-### Custom Orders
-- Easy customization request system
-- Product-specific customization forms
-- Direct communication with artisan
-
-### Responsive Design
-- Mobile-first approach
-- Tablet and desktop optimizations
-- Touch-friendly interactions
-- Fast loading times
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
+- **Row Level Security**: Database policies ensure data protection
+- **Authentication**: Secure admin login system
+- **Image Validation**: Only image files can be uploaded
+- **Input Validation**: Form validation on both client and server
 
 ## Support
 
-For support or questions, please contact:
-- Email: maheshwaridevank@gmail.com
-- WhatsApp: +91 7009972197
+For issues or questions:
+1. Check the Supabase documentation
+2. Review the console for error messages
+3. Ensure all environment variables are set correctly
 
----
+## License
+
+This project is open source and available under the MIT License.
 
