@@ -209,7 +209,7 @@ export default function Contact() {
 
               {/* Quick Contact Buttons */}
               <div className="mt-8 space-y-4">
-                <button className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2" onClick={() => window.open('https://www.instagram.com/artist_bhoomi_/', '_blank')}>
+                <button className="w-full bg-[#E1306C] hover:bg-[#C13584] text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2" onClick={() => window.open('https://www.instagram.com/artist_bhoomi_/', '_blank')}>
                   <MessageCircle className="w-5 h-5" />
                   <span>DM on Instagram</span>
                 </button>
@@ -258,7 +258,7 @@ export default function Contact() {
               },
               {
                 question: 'What payment methods do you accept?',
-                answer: 'We accept UPI, bank transfers, and cash on delivery. Payment is required before we start custom orders.',
+                answer: 'We accept UPI and bank transfers. Payment is required before we start custom orders.',
               },
             ].map((faq, index) => (
               <motion.div

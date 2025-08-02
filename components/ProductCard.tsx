@@ -27,14 +27,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="group relative cursor-pointer"
+        className="group relative cursor-pointer h-[420px]"
       >
         {/* Handcrafted Border Effect */}
         <div className="absolute -inset-1 bg-gradient-to-r from-primary-300 via-warm-400 to-accent-300 rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-500"></div>
         
-        <div className="relative bg-white rounded-3xl shadow-craft hover:shadow-craft-lg transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-cream-200">
+        <div className="relative bg-white rounded-3xl shadow-craft hover:shadow-craft-lg transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-cream-200 h-full flex flex-col">
           {/* Image Container */}
-          <div className="relative h-72 overflow-hidden">
+          <div className="relative h-52 overflow-hidden flex-shrink-0">
             <Image
               src={product.image}
               alt={product.name}
@@ -80,7 +80,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
 
           {/* Content */}
-          <div className="p-6 space-y-4">
+          <div className="p-5 pb-8 space-y-4 flex-1 flex flex-col">
             {/* Category Badge */}
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-primary-600 uppercase tracking-wider bg-primary-50 px-3 py-1 rounded-full">
@@ -90,20 +90,20 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
 
             {/* Title */}
-            <h3 className="text-xl font-craft font-semibold text-accent-800 group-hover:text-primary-600 transition-colors duration-300 leading-tight">
+            <h3 className="text-lg font-craft font-semibold text-accent-800 group-hover:text-primary-600 transition-colors duration-300 leading-tight line-clamp-2">
               {product.name}
             </h3>
 
             {/* Description */}
-            <p className="text-accent-600 text-sm leading-relaxed line-clamp-2">
+            <p className="text-accent-600 text-sm leading-relaxed line-clamp-1 flex-1">
               {product.description}
             </p>
 
             {/* Action Buttons */}
-            <div className="pt-2 flex gap-2">
+            <div className="pt-3 pb-2 flex gap-2 mt-auto">
               <button
                 onClick={handleCustomize}
-                className="flex-1 bg-gradient-to-r from-primary-500 to-warm-500 hover:from-primary-600 hover:to-warm-600 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 shadow-craft hover:shadow-craft-lg flex items-center justify-center gap-2 group/btn"
+                className="flex-1 bg-gradient-to-r from-primary-500 to-warm-500 hover:from-primary-600 hover:to-warm-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 shadow-craft hover:shadow-craft-lg flex items-center justify-center gap-2 group/btn text-sm"
               >
                 <MessageCircle className="w-4 h-4 group-hover/btn:animate-pulse" />
                 <span>Customize</span>
