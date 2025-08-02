@@ -4,7 +4,7 @@ import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Upload, Loader, Edit, Trash2, Plus, FileDown } from 'lucide-react'
 import { addProduct, updateProduct, uploadImage, uploadMultipleImages, deleteImage, Product } from '../lib/supabase'
-import { compressImage, compressMultipleImages, formatFileSize, getFileSizeInMB, getSmartCompressionOptions } from '../lib/imageCompression'
+import { compressImage, compressMultipleImages, formatFileSize, getFileSizeInMB, getAdminCompressionOptions, getCompressionInfo, isSupportedImageType } from '../lib/imageCompression'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
 
@@ -22,6 +22,9 @@ interface ImageFile {
   originalSize?: number
   compressedSize?: number
   isCompressed?: boolean
+  isWebP?: boolean
+  originalFormat?: string
+  compressedFormat?: string
 }
 
 export default function ProductForm({ onClose, onSuccess, product, isEditing = false }: ProductFormProps) {
@@ -60,44 +63,47 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    if (files.length > 0) {
+    const imageFiles = files.filter(file => isSupportedImageType(file))
+    
+    if (imageFiles.length > 0) {
       try {
         // Show compression notification
-        toast.loading('Compressing images...', { id: 'compression' })
+        toast.loading('Converting to WebP and compressing images...', { id: 'compression' })
         
-        // Compress all images with smart compression
+        // Compress all images with admin compression (WebP + 70-80% quality + 1200px max width)
         const compressedFiles = await Promise.all(
-          files.map(async (file) => {
-            const smartOptions = getSmartCompressionOptions(file.size)
-            return await compressImage(file, smartOptions)
+          imageFiles.map(async (file) => {
+            const adminOptions = getAdminCompressionOptions(file.size)
+            return await compressImage(file, adminOptions)
           })
         )
         
         const newImages: ImageFile[] = compressedFiles.map((compressedFile, index) => {
-          const originalFile = files[index]
-          const originalSize = originalFile.size
-          const compressedSize = compressedFile.size
-          const isCompressed = compressedSize < originalSize
+          const originalFile = imageFiles[index]
+          const compressionInfo = getCompressionInfo(originalFile, compressedFile)
           
           return {
             file: compressedFile,
             url: URL.createObjectURL(compressedFile),
             isNew: true,
-            originalSize,
-            compressedSize,
-            isCompressed
+            originalSize: compressionInfo.originalSize,
+            compressedSize: compressionInfo.compressedSize,
+            isCompressed: compressionInfo.savings > 0,
+            isWebP: compressionInfo.isWebP,
+            originalFormat: compressionInfo.originalFormat,
+            compressedFormat: compressionInfo.compressedFormat
           }
         })
         
         setImages(prev => [...prev, ...newImages])
         
         // Show compression results
-        const totalOriginalSize = files.reduce((sum, file) => sum + file.size, 0)
+        const totalOriginalSize = imageFiles.reduce((sum, file) => sum + file.size, 0)
         const totalCompressedSize = compressedFiles.reduce((sum, file) => sum + file.size, 0)
         const savings = ((totalOriginalSize - totalCompressedSize) / totalOriginalSize * 100).toFixed(1)
         
         toast.success(
-          `Images compressed! Saved ${savings}% (${formatFileSize(totalOriginalSize)} → ${formatFileSize(totalCompressedSize)})`,
+          `Images converted to WebP and compressed! Saved ${savings}% (${formatFileSize(totalOriginalSize)} → ${formatFileSize(totalCompressedSize)})`,
           { id: 'compression' }
         )
       } catch (error) {
@@ -122,50 +128,51 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
     e.stopPropagation()
     setDragActive(false)
     
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const files = Array.from(e.dataTransfer.files)
-      const imageFiles = files.filter(file => file.type.startsWith('image/'))
-      
-      if (imageFiles.length > 0) {
-        try {
-          // Show compression notification
-          toast.loading('Compressing images...', { id: 'compression' })
+           if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+         const files = Array.from(e.dataTransfer.files)
+         const imageFiles = files.filter(file => isSupportedImageType(file))
+         
+         if (imageFiles.length > 0) {
+           try {
+             // Show compression notification
+             toast.loading('Converting to WebP and compressing images...', { id: 'compression' })
+             
+             // Compress all images with admin compression (WebP + 70-80% quality + 1200px max width)
+             const compressedFiles = await Promise.all(
+               imageFiles.map(async (file) => {
+                 const adminOptions = getAdminCompressionOptions(file.size)
+                 return await compressImage(file, adminOptions)
+               })
+             )
           
-          // Compress all images with smart compression
-          const compressedFiles = await Promise.all(
-            imageFiles.map(async (file) => {
-              const smartOptions = getSmartCompressionOptions(file.size)
-              return await compressImage(file, smartOptions)
-            })
-          )
-          
-          const newImages: ImageFile[] = compressedFiles.map((compressedFile, index) => {
-            const originalFile = imageFiles[index]
-            const originalSize = originalFile.size
-            const compressedSize = compressedFile.size
-            const isCompressed = compressedSize < originalSize
-            
-            return {
-              file: compressedFile,
-              url: URL.createObjectURL(compressedFile),
-              isNew: true,
-              originalSize,
-              compressedSize,
-              isCompressed
-            }
-          })
-          
-          setImages(prev => [...prev, ...newImages])
-          
-          // Show compression results
-          const totalOriginalSize = imageFiles.reduce((sum, file) => sum + file.size, 0)
-          const totalCompressedSize = compressedFiles.reduce((sum, file) => sum + file.size, 0)
-          const savings = ((totalOriginalSize - totalCompressedSize) / totalOriginalSize * 100).toFixed(1)
-          
-          toast.success(
-            `Images compressed! Saved ${savings}% (${formatFileSize(totalOriginalSize)} → ${formatFileSize(totalCompressedSize)})`,
-            { id: 'compression' }
-          )
+                     const newImages: ImageFile[] = compressedFiles.map((compressedFile, index) => {
+             const originalFile = imageFiles[index]
+             const compressionInfo = getCompressionInfo(originalFile, compressedFile)
+             
+             return {
+               file: compressedFile,
+               url: URL.createObjectURL(compressedFile),
+               isNew: true,
+               originalSize: compressionInfo.originalSize,
+               compressedSize: compressionInfo.compressedSize,
+               isCompressed: compressionInfo.savings > 0,
+               isWebP: compressionInfo.isWebP,
+               originalFormat: compressionInfo.originalFormat,
+               compressedFormat: compressionInfo.compressedFormat
+             }
+           })
+           
+           setImages(prev => [...prev, ...newImages])
+           
+           // Show compression results
+           const totalOriginalSize = imageFiles.reduce((sum, file) => sum + file.size, 0)
+           const totalCompressedSize = compressedFiles.reduce((sum, file) => sum + file.size, 0)
+           const savings = ((totalOriginalSize - totalCompressedSize) / totalOriginalSize * 100).toFixed(1)
+           
+           toast.success(
+             `Images converted to WebP and compressed! Saved ${savings}% (${formatFileSize(totalOriginalSize)} → ${formatFileSize(totalCompressedSize)})`,
+             { id: 'compression' }
+           )
         } catch (error) {
           toast.error('Error compressing images', { id: 'compression' })
           console.error('Compression error:', error)
@@ -347,23 +354,30 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
                             Main
                           </div>
                         )}
-                                                 {/* Compression info for new images */}
-                         {image.isNew && image.isCompressed && (
-                           <div className="absolute bottom-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                             <FileDown className="w-3 h-3" />
-                             {image.originalSize && image.compressedSize && (
-                               <span>
-                                 {((image.originalSize - image.compressedSize) / image.originalSize * 100).toFixed(0)}%
-                               </span>
-                             )}
+                                                                          {/* WebP conversion info for new images */}
+                          {image.isNew && image.isWebP && (
+                            <div className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                              <FileDown className="w-3 h-3" />
+                              <span>WebP</span>
+                            </div>
+                          )}
+                         {/* Compression info for new images */}
+                          {image.isNew && image.isCompressed && !image.isWebP && (
+                            <div className="absolute bottom-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                              <FileDown className="w-3 h-3" />
+                              {image.originalSize && image.compressedSize && (
+                                <span>
+                                  {((image.originalSize - image.compressedSize) / image.originalSize * 100).toFixed(0)}%
+                                </span>
+                              )}
+                            </div>
+                          )}
+                         {/* File size info */}
+                         {image.isNew && (
+                           <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                             {image.compressedSize ? formatFileSize(image.compressedSize) : formatFileSize(image.file?.size || 0)}
                            </div>
                          )}
-                        {/* File size info */}
-                        {image.isNew && (
-                          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                            {image.compressedSize ? formatFileSize(image.compressedSize) : formatFileSize(image.file?.size || 0)}
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -371,28 +385,28 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
               )}
             </div>
 
-                         {/* Compression Settings */}
-             <div className="bg-gray-50 rounded-lg p-4">
-               <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                 <FileDown className="w-4 h-4" />
-                 Image Compression Settings
-               </h3>
-                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
-                 <div>
-                   <span className="font-medium">Quality:</span> 40-70% (adaptive)
-                 </div>
-                 <div>
-                   <span className="font-medium">Max Size:</span> 200-500KB
-                 </div>
-                 <div>
-                   <span className="font-medium">Max Dimensions:</span> 800-1400px
-                 </div>
-               </div>
-                             <p className="text-xs text-gray-500 mt-2">
-                 Images are automatically compressed using smart settings that adapt based on file size. 
-                 Large files get more aggressive compression for maximum savings.
-               </p>
-            </div>
+                                                   {/* Compression Settings */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                  <FileDown className="w-4 h-4" />
+                  WebP Conversion & Compression Settings
+                </h3>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
+                  <div>
+                    <span className="font-medium">Format:</span> Convert to WebP
+                  </div>
+                  <div>
+                    <span className="font-medium">Quality:</span> 70-80% (adaptive)
+                  </div>
+                  <div>
+                    <span className="font-medium">Max Width:</span> 1200px
+                  </div>
+                </div>
+                              <p className="text-xs text-gray-500 mt-2">
+                  Images are automatically converted to WebP format and compressed using smart settings. 
+                  WebP provides better compression while maintaining high quality.
+                </p>
+             </div>
 
             {/* Product Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
