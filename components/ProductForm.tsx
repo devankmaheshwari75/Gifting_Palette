@@ -2,8 +2,9 @@
 
 import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Upload, Loader, Edit, Trash2, Plus } from 'lucide-react'
+import { X, Upload, Loader, Edit, Trash2, Plus, FileDown } from 'lucide-react'
 import { addProduct, updateProduct, uploadImage, uploadMultipleImages, deleteImage, Product } from '../lib/supabase'
+import { compressImage, compressMultipleImages, formatFileSize, getFileSizeInMB, getSmartCompressionOptions } from '../lib/imageCompression'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
 
@@ -18,6 +19,9 @@ interface ImageFile {
   file?: File
   url: string
   isNew: boolean
+  originalSize?: number
+  compressedSize?: number
+  isCompressed?: boolean
 }
 
 export default function ProductForm({ onClose, onSuccess, product, isEditing = false }: ProductFormProps) {
@@ -54,15 +58,52 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     if (files.length > 0) {
-      const newImages: ImageFile[] = files.map(file => ({
-        file,
-        url: URL.createObjectURL(file),
-        isNew: true
-      }))
-      setImages(prev => [...prev, ...newImages])
+      try {
+        // Show compression notification
+        toast.loading('Compressing images...', { id: 'compression' })
+        
+        // Compress all images with smart compression
+        const compressedFiles = await Promise.all(
+          files.map(async (file) => {
+            const smartOptions = getSmartCompressionOptions(file.size)
+            return await compressImage(file, smartOptions)
+          })
+        )
+        
+        const newImages: ImageFile[] = compressedFiles.map((compressedFile, index) => {
+          const originalFile = files[index]
+          const originalSize = originalFile.size
+          const compressedSize = compressedFile.size
+          const isCompressed = compressedSize < originalSize
+          
+          return {
+            file: compressedFile,
+            url: URL.createObjectURL(compressedFile),
+            isNew: true,
+            originalSize,
+            compressedSize,
+            isCompressed
+          }
+        })
+        
+        setImages(prev => [...prev, ...newImages])
+        
+        // Show compression results
+        const totalOriginalSize = files.reduce((sum, file) => sum + file.size, 0)
+        const totalCompressedSize = compressedFiles.reduce((sum, file) => sum + file.size, 0)
+        const savings = ((totalOriginalSize - totalCompressedSize) / totalOriginalSize * 100).toFixed(1)
+        
+        toast.success(
+          `Images compressed! Saved ${savings}% (${formatFileSize(totalOriginalSize)} → ${formatFileSize(totalCompressedSize)})`,
+          { id: 'compression' }
+        )
+      } catch (error) {
+        toast.error('Error compressing images', { id: 'compression' })
+        console.error('Compression error:', error)
+      }
     }
   }
 
@@ -76,7 +117,7 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
     }
   }, [])
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
@@ -86,12 +127,49 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
       const imageFiles = files.filter(file => file.type.startsWith('image/'))
       
       if (imageFiles.length > 0) {
-        const newImages: ImageFile[] = imageFiles.map(file => ({
-          file,
-          url: URL.createObjectURL(file),
-          isNew: true
-        }))
-        setImages(prev => [...prev, ...newImages])
+        try {
+          // Show compression notification
+          toast.loading('Compressing images...', { id: 'compression' })
+          
+          // Compress all images with smart compression
+          const compressedFiles = await Promise.all(
+            imageFiles.map(async (file) => {
+              const smartOptions = getSmartCompressionOptions(file.size)
+              return await compressImage(file, smartOptions)
+            })
+          )
+          
+          const newImages: ImageFile[] = compressedFiles.map((compressedFile, index) => {
+            const originalFile = imageFiles[index]
+            const originalSize = originalFile.size
+            const compressedSize = compressedFile.size
+            const isCompressed = compressedSize < originalSize
+            
+            return {
+              file: compressedFile,
+              url: URL.createObjectURL(compressedFile),
+              isNew: true,
+              originalSize,
+              compressedSize,
+              isCompressed
+            }
+          })
+          
+          setImages(prev => [...prev, ...newImages])
+          
+          // Show compression results
+          const totalOriginalSize = imageFiles.reduce((sum, file) => sum + file.size, 0)
+          const totalCompressedSize = compressedFiles.reduce((sum, file) => sum + file.size, 0)
+          const savings = ((totalOriginalSize - totalCompressedSize) / totalOriginalSize * 100).toFixed(1)
+          
+          toast.success(
+            `Images compressed! Saved ${savings}% (${formatFileSize(totalOriginalSize)} → ${formatFileSize(totalCompressedSize)})`,
+            { id: 'compression' }
+          )
+        } catch (error) {
+          toast.error('Error compressing images', { id: 'compression' })
+          console.error('Compression error:', error)
+        }
       }
     }
   }, [])
@@ -238,7 +316,7 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB each</p>
+                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB each (will be compressed automatically)</p>
                 </div>
               </div>
 
@@ -269,11 +347,51 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
                             Main
                           </div>
                         )}
+                                                 {/* Compression info for new images */}
+                         {image.isNew && image.isCompressed && (
+                           <div className="absolute bottom-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                             <FileDown className="w-3 h-3" />
+                             {image.originalSize && image.compressedSize && (
+                               <span>
+                                 {((image.originalSize - image.compressedSize) / image.originalSize * 100).toFixed(0)}%
+                               </span>
+                             )}
+                           </div>
+                         )}
+                        {/* File size info */}
+                        {image.isNew && (
+                          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                            {image.compressedSize ? formatFileSize(image.compressedSize) : formatFileSize(image.file?.size || 0)}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
+            </div>
+
+                         {/* Compression Settings */}
+             <div className="bg-gray-50 rounded-lg p-4">
+               <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                 <FileDown className="w-4 h-4" />
+                 Image Compression Settings
+               </h3>
+                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
+                 <div>
+                   <span className="font-medium">Quality:</span> 40-70% (adaptive)
+                 </div>
+                 <div>
+                   <span className="font-medium">Max Size:</span> 200-500KB
+                 </div>
+                 <div>
+                   <span className="font-medium">Max Dimensions:</span> 800-1400px
+                 </div>
+               </div>
+                             <p className="text-xs text-gray-500 mt-2">
+                 Images are automatically compressed using smart settings that adapt based on file size. 
+                 Large files get more aggressive compression for maximum savings.
+               </p>
             </div>
 
             {/* Product Details */}
