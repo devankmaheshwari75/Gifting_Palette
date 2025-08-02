@@ -1,16 +1,23 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Upload, Loader, Edit } from 'lucide-react'
-import { addProduct, updateProduct, uploadImage, Product } from '../lib/supabase'
+import { X, Upload, Loader, Edit, Trash2, Plus } from 'lucide-react'
+import { addProduct, updateProduct, uploadImage, uploadMultipleImages, deleteImage, Product } from '../lib/supabase'
 import toast from 'react-hot-toast'
+import Image from 'next/image'
 
 interface ProductFormProps {
   onClose: () => void
   onSuccess: () => void
   product?: Product
   isEditing?: boolean
+}
+
+interface ImageFile {
+  file?: File
+  url: string
+  isNew: boolean
 }
 
 export default function ProductForm({ onClose, onSuccess, product, isEditing = false }: ProductFormProps) {
@@ -22,19 +29,88 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
     category: product?.category || '',
     featured: product?.featured || false
   })
-  const [image, setImage] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState(product?.image || '')
+  
+  const [images, setImages] = useState<ImageFile[]>(() => {
+    if (product) {
+      const imageFiles: ImageFile[] = []
+      
+      // Add main image
+      if (product.image) {
+        imageFiles.push({ url: product.image, isNew: false })
+      }
+      
+      // Add additional images
+      if (product.images && product.images.length > 0) {
+        product.images.forEach(img => {
+          imageFiles.push({ url: img, isNew: false })
+        })
+      }
+      
+      return imageFiles
+    }
+    return []
+  })
+  
   const [uploading, setUploading] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setImage(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
+    const files = Array.from(e.target.files || [])
+    if (files.length > 0) {
+      const newImages: ImageFile[] = files.map(file => ({
+        file,
+        url: URL.createObjectURL(file),
+        isNew: true
+      }))
+      setImages(prev => [...prev, ...newImages])
+    }
+  }
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true)
+    } else if (e.type === "dragleave") {
+      setDragActive(false)
+    }
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const files = Array.from(e.dataTransfer.files)
+      const imageFiles = files.filter(file => file.type.startsWith('image/'))
+      
+      if (imageFiles.length > 0) {
+        const newImages: ImageFile[] = imageFiles.map(file => ({
+          file,
+          url: URL.createObjectURL(file),
+          isNew: true
+        }))
+        setImages(prev => [...prev, ...newImages])
       }
-      reader.readAsDataURL(file)
+    }
+  }, [])
+
+  const removeImage = async (index: number) => {
+    const imageToRemove = images[index]
+    
+    if (imageToRemove.isNew) {
+      // Remove from local state only
+      setImages(prev => prev.filter((_, i) => i !== index))
+    } else {
+      // Delete from storage if it's an existing image
+      try {
+        await deleteImage(imageToRemove.url)
+        setImages(prev => prev.filter((_, i) => i !== index))
+        toast.success('Image removed successfully')
+      } catch (error) {
+        toast.error('Failed to remove image')
+      }
     }
   }
 
@@ -43,17 +119,29 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
     setUploading(true)
 
     try {
-      let imageUrl = imagePreview
+      // Upload new images
+      const newImages = images.filter(img => img.isNew && img.file)
+      const uploadedUrls: string[] = []
       
-      if (image) {
-        imageUrl = await uploadImage(image)
+      if (newImages.length > 0) {
+        const files = newImages.map(img => img.file!).filter(Boolean)
+        uploadedUrls.push(...await uploadMultipleImages(files))
       }
+
+      // Combine existing and new image URLs
+      const existingImages = images.filter(img => !img.isNew).map(img => img.url)
+      const allImages = [...existingImages, ...uploadedUrls]
+      
+      // First image becomes the main image
+      const mainImage = allImages[0] || ''
+      const additionalImages = allImages.slice(1)
 
       if (isEditing && product) {
         const updated = await updateProduct(product.id, {
           ...formData,
           price: parseFloat(formData.price),
-          image: imageUrl,
+          image: mainImage,
+          images: additionalImages,
           featured: formData.featured
         })
         
@@ -67,7 +155,8 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
         const added = await addProduct({
           ...formData,
           price: parseFloat(formData.price),
-          image: imageUrl,
+          image: mainImage,
+          images: additionalImages,
           featured: formData.featured
         })
         
@@ -98,7 +187,7 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+          className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="p-6 border-b">
@@ -116,40 +205,75 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Image Upload */}
+            {/* Multiple Image Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Image
+                Product Images (First image will be the main image)
               </label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors">
+              
+              {/* Drag & Drop Area */}
+              <div
+                className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors ${
+                  dragActive 
+                    ? 'border-purple-400 bg-purple-50' 
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
                 <div className="space-y-1 text-center">
-                  {imagePreview ? (
-                    <div className="mb-4">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="mx-auto h-32 w-32 object-cover rounded-lg"
-                      />
-                    </div>
-                  ) : (
-                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  )}
+                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
                   <div className="flex text-sm text-gray-600">
                     <label className="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
-                      <span>Upload a file</span>
+                      <span>Upload images</span>
                       <input
                         type="file"
                         className="sr-only"
                         accept="image/*"
+                        multiple
                         onChange={handleImageChange}
-                        required={!isEditing}
                       />
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB each</p>
                 </div>
               </div>
+
+              {/* Image Preview Grid */}
+              {images.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Uploaded Images:</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {images.map((image, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-square rounded-lg overflow-hidden border border-gray-200">
+                          <Image
+                            src={image.url}
+                            alt={`Product image ${index + 1}`}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                        {index === 0 && (
+                          <div className="absolute top-2 left-2 bg-purple-500 text-white text-xs px-2 py-1 rounded">
+                            Main
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Product Details */}
@@ -251,7 +375,7 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
               </button>
               <button
                 type="submit"
-                disabled={uploading}
+                disabled={uploading || images.length === 0}
                 className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {uploading ? (
@@ -261,7 +385,7 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
                   </>
                 ) : (
                   <>
-                    {isEditing ? <Edit className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
+                    {isEditing ? <Edit className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                     {isEditing ? 'Update Product' : 'Add Product'}
                   </>
                 )}

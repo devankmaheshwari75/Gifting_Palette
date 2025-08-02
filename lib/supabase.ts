@@ -11,6 +11,7 @@ export interface Product {
   type: string
   description: string
   image: string
+  images?: string[] // Array of additional images
   price: number
   category: string
   featured: boolean
@@ -33,6 +34,21 @@ export const getProducts = async (): Promise<Product[]> => {
   return data || []
 }
 
+export const getProductById = async (id: string): Promise<Product | null> => {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    console.error('Error fetching product:', error)
+    return null
+  }
+
+  return data
+}
+
 export const getFeaturedProducts = async (): Promise<Product[]> => {
   const { data, error } = await supabase
     .from('products')
@@ -42,6 +58,23 @@ export const getFeaturedProducts = async (): Promise<Product[]> => {
 
   if (error) {
     console.error('Error fetching featured products:', error)
+    return []
+  }
+
+  return data || []
+}
+
+export const getRelatedProducts = async (currentProductId: string, category: string, limit: number = 6): Promise<Product[]> => {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('category', category)
+    .neq('id', currentProductId)
+    .limit(limit)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching related products:', error)
     return []
   }
 
@@ -93,7 +126,7 @@ export const deleteProduct = async (id: string): Promise<boolean> => {
   return true
 }
 
-// Image Upload Function
+// Image Upload Functions
 export const uploadImage = async (file: File): Promise<string> => {
   const fileExt = file.name.split('.').pop()
   const fileName = `${Date.now()}.${fileExt}`
@@ -112,6 +145,29 @@ export const uploadImage = async (file: File): Promise<string> => {
     .getPublicUrl(filePath)
 
   return data.publicUrl
+}
+
+export const uploadMultipleImages = async (files: File[]): Promise<string[]> => {
+  const uploadPromises = files.map(file => uploadImage(file))
+  return Promise.all(uploadPromises)
+}
+
+export const deleteImage = async (imageUrl: string): Promise<boolean> => {
+  // Extract the file path from the URL
+  const urlParts = imageUrl.split('/')
+  const fileName = urlParts[urlParts.length - 1]
+  const filePath = `products/${fileName}`
+
+  const { error } = await supabase.storage
+    .from('product-images')
+    .remove([filePath])
+
+  if (error) {
+    console.error('Error deleting image:', error)
+    return false
+  }
+
+  return true
 }
 
 // Authentication Functions
