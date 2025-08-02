@@ -17,6 +17,7 @@ A beautiful, responsive website for showcasing handmade resin art products with 
 - **Image Upload**: Automatic image upload to Supabase storage
 - **Real-time Updates**: Changes reflect immediately on the website
 - **Dashboard Analytics**: View total products, featured count, and total value
+- **AI Content Enhancement**: Automatically improve product titles and descriptions using Google's Gemini AI
 
 ## Tech Stack
 
@@ -48,6 +49,7 @@ npm install
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url_here
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+   GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
 3. **Set Up Database**:
@@ -113,7 +115,22 @@ npm install
    - Enter admin email and password
    - This will be your login credentials for the admin panel
 
-### 4. Run the Development Server
+### 4. Set Up AI Enhancement (Optional)
+
+To enable the AI content enhancement feature:
+
+1. **Get a Gemini API Key**:
+   - Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - Create a new API key
+   - Add it to your `.env.local` file as `GEMINI_API_KEY`
+
+2. **How it Works**:
+   - In the admin product form, type a rough title and description
+   - Click the "Enhance with AI" button
+   - The AI will improve both fields with better, more engaging content
+   - Perfect for creating compelling product descriptions quickly
+
+### 5. Run the Development Server
 
 ```bash
 npm run dev
@@ -181,6 +198,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the website.
 Make sure to add these to your production environment:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `GEMINI_API_KEY` (optional, for AI enhancement feature)
 
 ## Security Features
 

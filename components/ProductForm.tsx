@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Upload, Loader, Edit, Trash2, Plus, FileDown } from 'lucide-react'
+import { X, Upload, Loader, Edit, Trash2, Plus, FileDown, Sparkles } from 'lucide-react'
 import { addProduct, updateProduct, uploadImage, uploadMultipleImages, deleteImage, Product } from '../lib/supabase'
 import { compressImage, compressMultipleImages, formatFileSize, getFileSizeInMB, getSmartCompressionOptions } from '../lib/imageCompression'
 import toast from 'react-hot-toast'
@@ -57,6 +57,7 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
   
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
+  const [enhancing, setEnhancing] = useState(false)
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -173,6 +174,47 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
       }
     }
   }, [])
+
+  const enhanceWithAI = async () => {
+    if (!formData.name && !formData.description) {
+      toast.error('Please provide at least a title or description to enhance')
+      return
+    }
+
+    setEnhancing(true)
+    try {
+      const response = await fetch('/api/enhance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: formData.name,
+          description: formData.description,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to enhance content')
+      }
+
+      const enhancedData = await response.json()
+      
+      setFormData(prev => ({
+        ...prev,
+        name: enhancedData.enhancedTitle,
+        description: enhancedData.enhancedDescription,
+      }))
+
+      toast.success('Content enhanced successfully!')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to enhance content')
+      console.error('Enhance error:', error)
+    } finally {
+      setEnhancing(false)
+    }
+  }
 
   const removeImage = async (index: number) => {
     const imageToRemove = images[index]
@@ -468,6 +510,28 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 required
               />
+            </div>
+
+            {/* Enhance with AI Button */}
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={enhanceWithAI}
+                disabled={enhancing || (!formData.name && !formData.description)}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg hover:shadow-xl"
+              >
+                {enhancing ? (
+                  <>
+                    <Loader className="h-4 w-4 animate-spin" />
+                    Enhancing with AI...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    Enhance with AI
+                  </>
+                )}
+              </button>
             </div>
 
             <div className="flex items-center">
