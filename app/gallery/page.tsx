@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { getProducts, getCategories, Category } from '../../lib/supabase'
 import Navbar from '../../components/Navbar'
@@ -42,6 +42,7 @@ export default function Gallery() {
     try {
       const data = await getCategories()
       console.log('Fetched categories:', data)
+      console.log('Categories count:', data.length)
       setCategories(data)
     } catch (error) {
       console.error('Error fetching categories:', error)
@@ -50,6 +51,9 @@ export default function Gallery() {
 
   const filterProducts = () => {
     console.log('Filtering products:', { selectedCategory, productsCount: products.length, categoriesCount: categories.length })
+    console.log('Available categories:', categories.map(c => ({ name: c.name, slug: c.slug })))
+    console.log('Product categories:', products.map(p => p.category))
+    
     if (selectedCategory === 'all') {
       setFilteredProducts(products)
     } else {
@@ -59,12 +63,35 @@ export default function Gallery() {
     }
   }
 
-  // Get categories that have products, with "Other" category at the end
-  const getActiveCategories = () => {
+  // Get categories that have products, with "Other" category at the end - now reactive with useMemo
+  const activeCategories = useMemo(() => {
+    console.log('Getting active categories...')
+    console.log('All categories:', categories)
+    console.log('All products:', products.map(p => ({ name: p.name, category: p.category })))
+    
+    // If no categories from database, create fallback categories from product data
+    if (categories.length === 0) {
+      console.log('No categories in database, creating fallback from products...')
+      const uniqueCategories = Array.from(new Set(products.map(p => p.category))).filter(Boolean)
+      
+      const fallbackCategories = uniqueCategories.map(categorySlug => ({
+        id: categorySlug,
+        name: categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1).replace(/-/g, ' '),
+        slug: categorySlug,
+        created_at: new Date().toISOString()
+      }))
+      
+      console.log('Fallback categories:', fallbackCategories)
+      return fallbackCategories
+    }
+    
     const categoriesWithProducts = categories.filter(category => {
       const productCount = products.filter(p => p.category === category.slug).length
+      console.log(`Category ${category.name} (${category.slug}): ${productCount} products`)
       return productCount > 0
     })
+
+    console.log('Categories with products:', categoriesWithProducts)
 
     // Separate "Other" category and place it at the end
     const otherCategory = categoriesWithProducts.find(cat => cat.slug === 'other')
@@ -74,9 +101,12 @@ export default function Gallery() {
       return [...regularCategories, otherCategory]
     }
     return regularCategories
-  }
+  }, [categories, products]) // Dependencies ensure it updates when either changes
 
-  const activeCategories = getActiveCategories()
+  // Debug logging
+  useEffect(() => {
+    console.log('Active categories for filtering:', activeCategories)
+  }, [activeCategories])
 
   return (
     <div className="min-h-screen">
