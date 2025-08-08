@@ -125,12 +125,12 @@ export default function ProductPage() {
               className="space-y-4"
             >
               {/* Main Image */}
-              <div className="relative aspect-square rounded-2xl overflow-hidden shadow-craft-lg border border-cream-200">
+              <div className="relative aspect-square rounded-2xl overflow-hidden shadow-craft-lg border border-cream-200 bg-gray-50">
                 <Image
                   src={productImages[selectedImage]}
                   alt={`${product.name} - Image ${selectedImage + 1}`}
                   fill
-                  className="object-cover cursor-pointer"
+                  className="object-contain p-4 cursor-pointer"
                   onClick={() => setImageModalOpen(true)}
                 />
                 <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
@@ -163,7 +163,7 @@ export default function ProductPage() {
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
-                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-300 ${
+                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-300 bg-gray-50 ${
                         selectedImage === index
                           ? 'border-primary-500 shadow-craft'
                           : 'border-cream-200 hover:border-primary-300'
@@ -173,7 +173,7 @@ export default function ProductPage() {
                         src={image}
                         alt={`${product.name} thumbnail ${index + 1}`}
                         fill
-                        className="object-cover"
+                        className="object-contain p-2"
                       />
                     </button>
                   ))}
@@ -291,7 +291,7 @@ export default function ProductPage() {
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {relatedProducts.map((relatedProduct, index) => (
                 <motion.div
                   key={relatedProduct.id}

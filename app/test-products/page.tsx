@@ -52,7 +52,7 @@ export default function TestProducts() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {products.map((product, index) => (
             <div key={product.id} className="border-2 border-dashed border-gray-300 p-4 rounded-lg">
               <p className="text-sm text-gray-600 mb-2">Product {index + 1}</p>

@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MessageCircle, Heart, Sparkles, ExternalLink } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Product } from '../lib/supabase';
 
 interface ProductCardProps {
@@ -11,108 +11,79 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const handleCustomize = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const phoneNumber = '7340991544';
-    const message = `Hi! I saw the "${product.name}" on your website and I'd like to discuss customization options.`;
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-    window.open(whatsappURL, '_blank');
-  };
-
   return (
     <Link href={`/product/${product.id}`} className="block">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="group relative cursor-pointer h-[400px]"
+        transition={{ duration: 0.4 }}
+        className="group relative cursor-pointer bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-100"
       >
-        {/* Handcrafted Border Effect */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-primary-300 via-warm-400 to-accent-300 rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-500"></div>
-        
-        <div className="relative bg-white rounded-3xl shadow-craft hover:shadow-craft-lg transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-cream-200 h-full flex flex-col">
-          {/* Image Container */}
-          <div className="relative h-48 overflow-hidden flex-shrink-0">
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
-            />
-            
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            
-            {/* Decorative Elements */}
-            <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform -translate-x-2 group-hover:translate-x-0">
-              <div className="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg">
-                <Sparkles className="w-4 h-4 text-primary-500" />
-              </div>
+        {/* Image Container - Flipkart Style */}
+        <div className="relative aspect-square bg-gray-50 flex items-center justify-center overflow-hidden">
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          />
+          
+          {/* Wishlist Button - Top Right */}
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full text-gray-600 hover:text-red-500 transition-all duration-200 shadow-sm hover:shadow-md hover:scale-110 opacity-0 group-hover:opacity-100"
+          >
+            <Heart className="w-4 h-4" />
+          </button>
+
+          {/* Discount Badge - Top Left (if applicable) */}
+          {product.price && (
+            <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-medium px-2 py-1 rounded-md">
+              -20%
             </div>
+          )}
+        </div>
 
-            {/* Price Badge */}
-            {product.price && (
-              <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-semibold text-primary-700 shadow-lg border border-cream-200">
+        {/* Content Section - Compact & Clean */}
+        <div className="p-4 space-y-2">
+          {/* Product Name - Flipkart Style */}
+          <h3 className="text-sm font-medium text-gray-800 line-clamp-2 leading-tight group-hover:text-primary-600 transition-colors duration-200">
+            {product.name}
+          </h3>
+
+          {/* Price Section - Flipkart Style */}
+          {product.price && (
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold text-gray-900">
                 ₹{product.price}
-              </div>
-            )}
+              </span>
+              <span className="text-sm text-gray-500 line-through">
+                ₹{Math.round(product.price * 1.25)}
+              </span>
+            </div>
+          )}
 
-            {/* Favorite Button */}
-            <button 
+          {/* Quick Actions */}
+          <div className="pt-2">
+            <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                const phoneNumber = '7340991544';
+                const message = `Hi! I saw the "${product.name}" on your website and I'd like to discuss customization options.`;
+                const encodedMessage = encodeURIComponent(message);
+                const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+                window.open(whatsappURL, '_blank');
               }}
-              className="absolute top-4 left-4 p-3 bg-white/90 backdrop-blur-sm rounded-full text-accent-600 hover:text-primary-500 transition-all duration-300 shadow-lg border border-cream-200 hover:scale-110"
+              className="w-full bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-1"
             >
-              <Heart className="w-4 h-4" />
+              Customize
             </button>
-
-            {/* View Details Badge */}
-            <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-              <div className="bg-white/95 backdrop-blur-sm px-3 py-2 rounded-full text-xs font-medium text-accent-700 shadow-lg border border-cream-200 flex items-center gap-1">
-                <ExternalLink className="w-3 h-3" />
-                View Details
-              </div>
-            </div>
           </div>
-
-          {/* Content */}
-          <div className="p-5 pb-8 space-y-4 flex-1 flex flex-col">
-            {/* Category Badge */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-primary-600 uppercase tracking-wider bg-primary-50 px-3 py-1 rounded-full">
-                {product.type}
-              </span>
-              <div className="flex-1 h-px bg-gradient-to-r from-primary-200 to-transparent"></div>
-            </div>
-
-            {/* Title */}
-            <h3 className="text-lg font-craft font-semibold text-accent-800 group-hover:text-primary-600 transition-colors duration-300 leading-tight line-clamp-1">
-              {product.name}
-            </h3>
-
-            {/* Description */}
-            <p className="text-accent-600 text-sm leading-relaxed line-clamp-2 flex-1">
-              {product.description}
-            </p>
-
-            {/* Action Buttons */}
-            <div className="pt-2 pb-2 flex gap-2 mt-auto">
-              <button
-                onClick={handleCustomize}
-                className="flex-1 bg-gradient-to-r from-primary-500 to-warm-500 hover:from-primary-600 hover:to-warm-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 shadow-craft hover:shadow-craft-lg flex items-center justify-center gap-2 group/btn text-sm"
-              >
-                <MessageCircle className="w-4 h-4 group-hover/btn:animate-pulse" />
-                <span>Customize</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Bottom Decorative Line */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-300 via-warm-400 to-accent-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         </div>
       </motion.div>
     </Link>
