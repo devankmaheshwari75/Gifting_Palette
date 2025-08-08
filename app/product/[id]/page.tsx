@@ -267,7 +267,7 @@ export default function ProductPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <div className="flex gap-4 pt-4">
                 <button
                   onClick={handleCustomize}
                   className="flex-1 bg-gradient-to-r from-primary-500 to-warm-500 hover:from-primary-600 hover:to-warm-600 text-white font-medium py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 shadow-craft hover:shadow-craft-lg flex items-center justify-center gap-3"
@@ -275,7 +275,7 @@ export default function ProductPage() {
                   <MessageCircle className="w-5 h-5" />
                   <span>Customize This Piece</span>
                 </button>
-                <button className="p-4 bg-white border-2 border-primary-200 text-primary-600 hover:bg-primary-50 rounded-xl transition-all duration-300">
+                <button className="w-16 h-16 bg-white border-2 border-primary-200 text-primary-600 hover:bg-primary-50 rounded-xl transition-all duration-300 flex items-center justify-center flex-shrink-0">
                   <Heart className="w-5 h-5" />
                 </button>
               </div>
