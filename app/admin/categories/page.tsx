@@ -97,7 +97,7 @@ export default function AdminCategories() {
       
       <AdminNav currentPage="categories" onLogout={() => setUser(null)} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <motion.div
@@ -128,9 +128,9 @@ export default function AdminCategories() {
           </button>
         </div>
 
-        {/* Categories List */}
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-          <div className="px-6 py-4 border-b">
+                 {/* Categories List */}
+         <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+           <div className="px-4 sm:px-6 py-4 border-b">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">All Categories</h2>
               <span className="text-sm text-gray-500">
@@ -138,18 +138,18 @@ export default function AdminCategories() {
               </span>
             </div>
           </div>
-          <div className="p-6">
+                     <div className="p-4 sm:p-6">
             {categories.length === 0 ? (
               <p className="text-gray-500 text-center py-8">No categories found. Add your first category above.</p>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                   {currentCategories.map((category) => (
                     <motion.div
                       key={category.id}
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border hover:shadow-md transition-all duration-200"
+                                             className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg border hover:shadow-md transition-all duration-200"
                     >
                       <div>
                         <h3 className="font-medium text-gray-900">{category.name}</h3>
@@ -169,9 +169,9 @@ export default function AdminCategories() {
                   ))}
                 </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-between items-center mt-6 pt-6 border-t">
+                                 {/* Pagination */}
+                 {totalPages > 1 && (
+                   <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-6 border-t gap-4 sm:gap-0">
                     <div className="text-sm text-gray-500">
                       Showing {indexOfFirstCategory + 1} to {Math.min(indexOfLastCategory, categories.length)} of {categories.length} categories
                     </div>

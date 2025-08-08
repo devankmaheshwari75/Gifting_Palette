@@ -86,13 +86,13 @@ export default function AdminDashboard() {
       
       <AdminNav currentPage="dashboard" onLogout={() => setUser(null)} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-6 rounded-xl shadow-sm border"
+            className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border"
           >
             <div className="flex items-center">
               <div className="p-3 bg-blue-100 rounded-lg">
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white p-6 rounded-xl shadow-sm border"
+            className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border"
           >
             <div className="flex items-center">
               <div className="p-3 bg-green-100 rounded-lg">
@@ -126,7 +126,7 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white p-6 rounded-xl shadow-sm border"
+            className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border"
           >
             <div className="flex items-center">
               <div className="p-3 bg-purple-100 rounded-lg">
@@ -140,13 +140,13 @@ export default function AdminDashboard() {
           </motion.div>
         </div>
 
-        {/* Navigation Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                 {/* Navigation Cards */}
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
           <Link href="/admin/products">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer"
+              className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer"
             >
               <div className="flex items-center">
                 <div className="p-3 bg-purple-100 rounded-lg">
@@ -166,7 +166,7 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer"
+              className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer"
             >
               <div className="flex items-center">
                 <div className="p-3 bg-blue-100 rounded-lg">

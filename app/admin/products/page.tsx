@@ -165,7 +165,7 @@ export default function AdminProducts() {
       
       <AdminNav currentPage="products" onLogout={() => setUser(null)} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <motion.div
@@ -219,9 +219,9 @@ export default function AdminProducts() {
           </motion.div>
         </div>
 
-        {/* Filters and Search */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
+                 {/* Filters and Search */}
+         <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-8">
+           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">Search Products</label>
@@ -237,8 +237,8 @@ export default function AdminProducts() {
               </div>
             </div>
 
-            {/* Category Filter */}
-            <div className="lg:w-64">
+                         {/* Category Filter */}
+             <div className="w-full lg:w-64">
               <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Category</label>
               <select
                 value={selectedCategory}
@@ -267,9 +267,9 @@ export default function AdminProducts() {
           </button>
         </div>
 
-        {/* Products List */}
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-          <div className="px-6 py-4 border-b">
+                 {/* Products List */}
+         <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+           <div className="px-4 sm:px-6 py-4 border-b">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">All Products</h2>
               <span className="text-sm text-gray-500">
@@ -277,7 +277,7 @@ export default function AdminProducts() {
               </span>
             </div>
           </div>
-          <div className="overflow-x-auto">
+                     <div className="overflow-x-auto w-full">
             {filteredProducts.length === 0 ? (
               <div className="p-8 text-center">
                 <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -289,16 +289,16 @@ export default function AdminProducts() {
                 </p>
               </div>
             ) : (
-              <table className="w-full">
+                             <table className="w-full min-w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Featured</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                     <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                     <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                     <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                     <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                     <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Featured</th>
+                     <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -309,38 +309,38 @@ export default function AdminProducts() {
                       animate={{ opacity: 1, y: 0 }}
                       className="hover:bg-gray-50"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="h-12 w-12 rounded-lg object-cover"
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500 truncate max-w-xs">{product.description}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{product.type}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">₹{product.price}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
-                          {product.category}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          product.featured 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {product.featured ? 'Yes' : 'No'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                             <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                         <img
+                           src={product.image}
+                           alt={product.name}
+                           className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg object-cover"
+                         />
+                       </td>
+                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                         <div className="text-sm text-gray-500 truncate max-w-xs">{product.description}</div>
+                       </td>
+                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                         <div className="text-sm text-gray-500">{product.type}</div>
+                       </td>
+                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                         <div className="text-sm text-gray-900">₹{product.price}</div>
+                       </td>
+                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                         <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                           {product.category}
+                         </span>
+                       </td>
+                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                           product.featured 
+                             ? 'bg-green-100 text-green-800' 
+                             : 'bg-gray-100 text-gray-800'
+                         }`}>
+                           {product.featured ? 'Yes' : 'No'}
+                         </span>
+                       </td>
+                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button 
                           onClick={() => handleEditProduct(product)}
                           className="text-indigo-600 hover:text-indigo-900 mr-3 flex items-center gap-1"
@@ -363,9 +363,9 @@ export default function AdminProducts() {
             )}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-between items-center px-6 py-4 border-t">
+                     {/* Pagination */}
+           {totalPages > 1 && (
+             <div className="flex flex-col sm:flex-row justify-between items-center px-4 sm:px-6 py-4 border-t gap-4 sm:gap-0">
               <div className="text-sm text-gray-500">
                 Showing {indexOfFirstProduct + 1} to {Math.min(indexOfLastProduct, filteredProducts.length)} of {filteredProducts.length} products
               </div>
