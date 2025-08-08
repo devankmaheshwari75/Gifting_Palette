@@ -64,7 +64,7 @@ export default function AdminProducts() {
     // Filter by category
     if (selectedCategory !== 'all') {
       console.log('Filtering by category:', selectedCategory)
-      console.log('Available product categories:', [...new Set(products.map(p => p.category))])
+      console.log('Available product categories:', Array.from(new Set(products.map(p => p.category))))
       console.log('Available category names:', categories.map(c => c.name))
       console.log('Available category slugs:', categories.map(c => c.slug))
       
