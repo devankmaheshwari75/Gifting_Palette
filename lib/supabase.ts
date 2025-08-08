@@ -19,6 +19,59 @@ export interface Product {
   updated_at: string
 }
 
+export interface Category {
+  id: string
+  name: string
+  slug: string
+  created_at: string
+}
+
+// Category Management Functions
+export const getCategories = async (): Promise<Category[]> => {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('name', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching categories:', error)
+    return []
+  }
+
+  return data || []
+}
+
+export const addCategory = async (name: string): Promise<Category | null> => {
+  const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  
+  const { data, error } = await supabase
+    .from('categories')
+    .insert([{ name, slug }])
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error adding category:', error)
+    return null
+  }
+
+  return data
+}
+
+export const deleteCategory = async (id: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from('categories')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error deleting category:', error)
+    return false
+  }
+
+  return true
+}
+
 // Product Management Functions
 export const getProducts = async (): Promise<Product[]> => {
   const { data, error } = await supabase

@@ -2,27 +2,35 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, LogOut, Package, Users, DollarSign, Upload, Edit, Trash2 } from 'lucide-react'
-import { getProducts, deleteProduct, getCurrentUser, signOut } from '../../lib/supabase'
+import { Plus, LogOut, Package, Users, DollarSign, Upload, Edit, Trash2, Tag } from 'lucide-react'
+import { getProducts, deleteProduct, getCurrentUser, signOut, getCategories, deleteCategory, Category } from '../../lib/supabase'
 import AdminLogin from '../../components/AdminLogin'
 import ProductForm from '../../components/ProductForm'
+import CategoryForm from '../../components/CategoryForm'
 import toast from 'react-hot-toast'
 
 export default function AdminDashboard() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [showProductForm, setShowProductForm] = useState(false)
+  const [showCategoryForm, setShowCategoryForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<any>(null)
   const [products, setProducts] = useState<any[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [stats, setStats] = useState({
     totalProducts: 0,
     featuredProducts: 0,
     totalValue: 0
   })
 
+  // Category pagination state
+  const [currentCategoryPage, setCurrentCategoryPage] = useState(1)
+  const [categoriesPerPage] = useState(8) // Show 8 categories per page (2x4 grid)
+
   useEffect(() => {
     checkUser()
     fetchProducts()
+    fetchCategories()
   }, [])
 
   const checkUser = async () => {
@@ -47,6 +55,15 @@ export default function AdminDashboard() {
     }
   }
 
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories()
+      setCategories(data)
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+    }
+  }
+
   const handleLogout = async () => {
     await signOut()
     setUser(null)
@@ -57,6 +74,13 @@ export default function AdminDashboard() {
     setShowProductForm(false)
     setEditingProduct(null)
     fetchProducts()
+  }
+
+  const handleCategoryAdded = () => {
+    setShowCategoryForm(false)
+    fetchCategories()
+    // Reset to first page when adding new category
+    setCurrentCategoryPage(1)
   }
 
   const handleEditProduct = (product: any) => {
@@ -74,6 +98,33 @@ export default function AdminDashboard() {
         toast.error('Error deleting product')
       }
     }
+  }
+
+  const handleDeleteCategory = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this category? This will affect all products in this category.')) {
+      const success = await deleteCategory(id)
+      if (success) {
+        fetchCategories()
+        toast.success('Category deleted successfully!')
+        // Reset to first page if we're on a page that no longer exists
+        const newTotalPages = Math.ceil((categories.length - 1) / categoriesPerPage)
+        if (currentCategoryPage > newTotalPages && newTotalPages > 0) {
+          setCurrentCategoryPage(newTotalPages)
+        }
+      } else {
+        toast.error('Error deleting category')
+      }
+    }
+  }
+
+  // Category pagination logic
+  const indexOfLastCategory = currentCategoryPage * categoriesPerPage
+  const indexOfFirstCategory = indexOfLastCategory - categoriesPerPage
+  const currentCategories = categories.slice(indexOfFirstCategory, indexOfLastCategory)
+  const totalCategoryPages = Math.ceil(categories.length / categoriesPerPage)
+
+  const handleCategoryPageChange = (pageNumber: number) => {
+    setCurrentCategoryPage(pageNumber)
   }
 
   if (loading) {
@@ -174,6 +225,7 @@ export default function AdminDashboard() {
           </button>
         </div>
 
+
         {/* Products List */}
         <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
           <div className="px-6 py-4 border-b">
@@ -247,6 +299,17 @@ export default function AdminDashboard() {
             </table>
           </div>
         </div>
+
+        {/* Add New Category Button */}
+        <div className="mt-8">
+          <button
+            onClick={() => setShowCategoryForm(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+          >
+            <Tag className="h-5 w-5" />
+            Add New Category
+          </button>
+        </div>
       </div>
 
       {/* Product Form Modal */}
@@ -261,6 +324,88 @@ export default function AdminDashboard() {
           isEditing={!!editingProduct}
         />
       )}
+
+      {/* Category Form Modal */}
+      {showCategoryForm && (
+        <CategoryForm 
+          onClose={() => setShowCategoryForm(false)}
+          onSuccess={handleCategoryAdded}
+        />
+      )}
+
+              {/* Categories Management */}
+        <div className="mb-8 bg-white rounded-xl shadow-sm border overflow-hidden">
+          <div className="px-6 py-4 border-b">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Categories Management</h2>
+              <span className="text-sm text-gray-500">
+                {categories.length} {categories.length === 1 ? 'category' : 'categories'} total
+              </span>
+            </div>
+          </div>
+          <div className="p-6">
+            {categories.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No categories found. Add your first category below.</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {currentCategories.map((category) => (
+                    <div key={category.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                      <div>
+                        <h3 className="font-medium text-gray-900">{category.name}</h3>
+                        <p className="text-sm text-gray-500">Slug: {category.slug}</p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteCategory(category.id)}
+                        className="text-red-600 hover:text-red-800 transition-colors p-2"
+                        title="Delete category"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination for Categories */}
+                {totalCategoryPages > 1 && (
+                  <div className="flex justify-between items-center mt-6 pt-6 border-t">
+                    <div className="text-sm text-gray-500">
+                      Showing {indexOfFirstCategory + 1} to {Math.min(indexOfLastCategory, categories.length)} of {categories.length} categories
+                    </div>
+                    <nav className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleCategoryPageChange(currentCategoryPage - 1)}
+                        disabled={currentCategoryPage === 1}
+                        className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Previous
+                      </button>
+                      
+                      <span className="px-4 py-2 text-sm text-gray-700">
+                        Page {currentCategoryPage} of {totalCategoryPages}
+                      </span>
+                      
+                      <button
+                        onClick={() => handleCategoryPageChange(currentCategoryPage + 1)}
+                        disabled={currentCategoryPage === totalCategoryPages}
+                        className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                      >
+                        Next
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </nav>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
     </div>
   )
 } 

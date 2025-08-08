@@ -168,3 +168,86 @@ INSERT INTO products (name, type, description, image, price, category, featured)
 7. Ensure all images are being stored in Supabase storage
 
 The implementation is now complete with full multiple image support! 🎉 
+
+## Categories Table Setup
+
+To enable dynamic category management, you need to create a `categories` table in your Supabase database.
+
+### 1. Create Categories Table
+
+Run this SQL in your Supabase SQL Editor:
+
+```sql
+-- Create categories table
+CREATE TABLE categories (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  slug TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create index for better performance
+CREATE INDEX idx_categories_slug ON categories(slug);
+CREATE INDEX idx_categories_name ON categories(name);
+
+-- Insert some default categories
+INSERT INTO categories (name, slug) VALUES
+  ('Watches', 'watches'),
+  ('Keyrings', 'keyrings'),
+  ('Photo Frames', 'photo-frames'),
+  ('Other', 'other');
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+
+-- Create policy to allow all authenticated users to read categories
+CREATE POLICY "Allow authenticated users to read categories" ON categories
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+-- Create policy to allow authenticated users to insert categories
+CREATE POLICY "Allow authenticated users to insert categories" ON categories
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+-- Create policy to allow authenticated users to delete categories
+CREATE POLICY "Allow authenticated users to delete categories" ON categories
+  FOR DELETE USING (auth.role() = 'authenticated');
+```
+
+### 2. Update Products Table (if needed)
+
+If your products table doesn't have a category column, add it:
+
+```sql
+-- Add category column to products table if it doesn't exist
+ALTER TABLE products ADD COLUMN IF NOT EXISTS category TEXT;
+
+-- Update existing products to use the new category system
+UPDATE products SET category = 'other' WHERE category IS NULL OR category = '';
+```
+
+### 3. Verify Setup
+
+After running the SQL:
+
+1. Go to your Supabase dashboard
+2. Navigate to Table Editor
+3. You should see a new `categories` table
+4. The table should contain the default categories
+
+## Features Added
+
+With this setup, you now have:
+
+✅ **Dynamic Category Management**: Add/remove categories through the admin panel
+✅ **Category Filtering**: Filter products by category in the gallery
+✅ **Consistent Category System**: All products use the same category structure
+✅ **Admin Controls**: Full CRUD operations for categories
+
+## Usage
+
+1. **Add Categories**: Use the "Add New Category" button in the admin panel
+2. **Delete Categories**: Click the trash icon next to any category
+3. **Filter Products**: Use category filters in the gallery page
+4. **Product Assignment**: Select categories when adding/editing products
+
+The system automatically generates URL-friendly slugs from category names and maintains consistency across your entire application. 

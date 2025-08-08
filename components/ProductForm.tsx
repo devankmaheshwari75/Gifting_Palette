@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Upload, Loader, Edit, Trash2, Plus, FileDown, Sparkles } from 'lucide-react'
-import { addProduct, updateProduct, uploadImage, uploadMultipleImages, deleteImage, Product } from '../lib/supabase'
+import { addProduct, updateProduct, uploadImage, uploadMultipleImages, deleteImage, Product, getCategories, Category } from '../lib/supabase'
 import { compressImage, compressMultipleImages, formatFileSize, getFileSizeInMB, getAdminCompressionOptions, getCompressionInfo, isSupportedImageType } from '../lib/imageCompression'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
@@ -37,6 +37,9 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
     featured: product?.featured || false
   })
   
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loadingCategories, setLoadingCategories] = useState(true)
+  
   const [images, setImages] = useState<ImageFile[]>(() => {
     if (product) {
       const imageFiles: ImageFile[] = []
@@ -61,6 +64,23 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [enhancing, setEnhancing] = useState(false)
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categoriesData = await getCategories()
+        setCategories(categoriesData)
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+        toast.error('Failed to load categories')
+      } finally {
+        setLoadingCategories(false)
+      }
+    }
+
+    fetchCategories()
+  }, [])
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -503,13 +523,22 @@ export default function ProductForm({ onClose, onSuccess, product, isEditing = f
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   required
+                  disabled={loadingCategories}
                 >
-                  <option value="">Select category</option>
-                  <option value="watches">Watches</option>
-                  <option value="keyrings">Keyrings</option>
-                  <option value="photo-frames">Photo Frames</option>
-                  <option value="other">Other</option>
+                  <option value="">
+                    {loadingCategories ? 'Loading categories...' : 'Select category'}
+                  </option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.slug}>
+                      {category.name}
+                    </option>
+                  ))}
                 </select>
+                {categories.length === 0 && !loadingCategories && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    No categories available. Please add categories in the admin panel.
+                  </p>
+                )}
               </div>
             </div>
 
