@@ -133,6 +133,14 @@ export default function ProductPage() {
                   className="object-contain p-4 cursor-pointer"
                   onClick={() => setImageModalOpen(true)}
                 />
+                
+                {/* Discount Badge - Top Left */}
+                {product.price && (
+                  <div className="absolute top-4 left-4 bg-red-500 text-white text-sm font-medium px-3 py-1.5 rounded-md shadow-lg">
+                    -20%
+                  </div>
+                )}
+                
                 <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
                   <ZoomIn className="w-8 h-8 text-white opacity-0 hover:opacity-100 transition-opacity duration-300" />
                 </div>
@@ -203,8 +211,13 @@ export default function ProductPage() {
 
               {/* Price */}
               {product.price && (
-                <div className="text-2xl font-bold text-primary-600">
-                  ₹{product.price}
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl font-bold text-gray-900">
+                    ₹{product.price}
+                  </span>
+                  <span className="text-lg text-gray-500 line-through">
+                    ₹{Math.round(product.price * 1.25)}
+                  </span>
                 </div>
               )}
 
