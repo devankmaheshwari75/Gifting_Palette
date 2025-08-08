@@ -133,61 +133,98 @@ export default function Gallery() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8"
+          className="mb-8"
         >
-          <div className="flex items-center gap-2 flex-wrap">
-            <Filter className="h-5 w-5 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">Filter by:</span>
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedCategory === 'all'
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              All ({products.length})
-            </button>
-            {activeCategories.map((category) => {
-              const categoryProductCount = products.filter(p => p.category === category.slug).length
-              return (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.slug)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    selectedCategory === category.slug
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {category.name} ({categoryProductCount})
-                </button>
-              )
-            })}
+          {/* Filter Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-primary-50 rounded-lg">
+                  <Filter className="h-4 w-4 text-primary-600" />
+                </div>
+                <span className="text-sm font-semibold text-gray-700">Filter by Category</span>
+              </div>
+            </div>
+
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-lg transition-all duration-200 ${
+                  viewMode === 'grid'
+                    ? 'bg-primary-50 text-primary-600 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
+                title="Grid View"
+              >
+                <Grid className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-lg transition-all duration-200 ${
+                  viewMode === 'list'
+                    ? 'bg-primary-50 text-primary-600 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
+                title="List View"
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
-          {/* View Mode Toggle */}
-          <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === 'grid'
-                  ? 'bg-white text-primary-600 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <Grid className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === 'list'
-                  ? 'bg-white text-primary-600 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <List className="h-5 w-5" />
-            </button>
+          {/* Category Filter Pills */}
+          <div className="relative">
+            {/* Gradient Fade Indicators */}
+            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+            
+            {/* Scrollable Filter Container */}
+            <div className="overflow-x-auto scrollbar-hide">
+              <div className="flex items-center gap-3 min-w-max px-4 py-2">
+                <button
+                  onClick={() => setSelectedCategory('all')}
+                  className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap border-2 ${
+                    selectedCategory === 'all'
+                      ? 'bg-primary-600 text-white border-primary-600 shadow-lg shadow-primary-200'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <span>All Products</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                      selectedCategory === 'all' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {products.length}
+                    </span>
+                  </span>
+                </button>
+                
+                {activeCategories.map((category) => {
+                  const categoryProductCount = products.filter(p => p.category === category.slug).length
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => setSelectedCategory(category.slug)}
+                      className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap border-2 ${
+                        selectedCategory === category.slug
+                          ? 'bg-primary-600 text-white border-primary-600 shadow-lg shadow-primary-200'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span>{category.name}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          selectedCategory === category.slug ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {categoryProductCount}
+                        </span>
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         </motion.div>
 
