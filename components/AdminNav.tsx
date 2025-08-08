@@ -2,18 +2,35 @@
 
 import React from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Package, Tag, Home, LogOut } from 'lucide-react'
 import { signOut } from '../lib/supabase'
 import toast from 'react-hot-toast'
 
 interface AdminNavProps {
   currentPage?: 'dashboard' | 'products' | 'categories'
+  onLogout?: () => void
 }
 
-export default function AdminNav({ currentPage = 'dashboard' }: AdminNavProps) {
+export default function AdminNav({ currentPage = 'dashboard', onLogout }: AdminNavProps) {
+  const router = useRouter()
+
   const handleLogout = async () => {
-    await signOut()
-    toast.success('Logged out successfully')
+    try {
+      await signOut()
+      toast.success('Logged out successfully')
+      
+      // Call the parent's onLogout callback if provided
+      if (onLogout) {
+        onLogout()
+      }
+      
+      // Redirect to login page
+      router.push('/admin')
+    } catch (error) {
+      console.error('Logout error:', error)
+      toast.error('Error logging out')
+    }
   }
 
   const navItems = [
