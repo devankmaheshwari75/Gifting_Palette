@@ -73,11 +73,17 @@ export const deleteCategory = async (id: string): Promise<boolean> => {
 }
 
 // Product Management Functions
-export const getProducts = async (): Promise<Product[]> => {
-  const { data, error } = await supabase
+export const getProducts = async (category?: string): Promise<Product[]> => {
+  let query = supabase
     .from('products')
     .select('*')
     .order('created_at', { ascending: false })
+
+  if (category && category !== 'all') {
+    query = query.eq('category', category)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     console.error('Error fetching products:', error)
