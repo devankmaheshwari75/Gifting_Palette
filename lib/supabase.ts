@@ -274,8 +274,9 @@ export const cleanupOrphanedImages = async (): Promise<void> => {
 
 // Image Upload Functions
 export const uploadImage = async (file: File): Promise<string> => {
-  const fileExt = file.name.split('.').pop()
-  const fileName = `${Date.now()}.${fileExt}`
+  const fileExt = file.name.split('.').pop() || 'webp'
+  const uniqueId = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const fileName = `${uniqueId}.${fileExt}`
   const filePath = `products/${fileName}`
 
   const { error: uploadError } = await supabase.storage
